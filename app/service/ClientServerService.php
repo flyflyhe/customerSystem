@@ -41,7 +41,10 @@ class ClientServerService
 
     public function send()
     {
-        ChannelClient::publish(ChannelEvent::EVENT_SEND_USER_TO_USER, ['toUid' => (int)$this->data['toUid']]);
+        ChannelClient::publish(ChannelEvent::EVENT_SEND_USER_TO_USER, [
+            'toUid' => (int)$this->data['toUid'],
+            'fromUid' => (int)$this->data['fromUid'],
+        ]);
     }
 
     public function handle()

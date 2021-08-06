@@ -20,11 +20,12 @@ class ChannelClientService
     public function sendUserToUser($data)
     {
         $toUid = $data['toUid'];
+        $fromUid = $data['fromUid'];
         $userConn = UserConnectionModel::getUidConnectionMap();
 
         $conn = $userConn[$toUid] ?? null;
         if ($conn instanceof TcpConnection) {
-            $conn->send(json_encode(['event' => 'send', 'msg' => 'hi']));
+            $conn->send(json_encode(['event' => 'send', 'data' => ['msg' => 'hi', 'fromUid' => $fromUid]]));
         }
     }
 
