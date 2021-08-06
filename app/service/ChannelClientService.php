@@ -2,7 +2,9 @@
 
 namespace app\service;
 
+use app\model\UserConnectionModel;
 use Channel\Client as ChannelClient;
+use Workerman\Connection\TcpConnection;
 
 class ChannelClientService
 {
@@ -17,8 +19,13 @@ class ChannelClientService
 
     public function sendUserToUser($data)
     {
-        var_dump($data);
-        echo 'send user to user', PHP_EOL;
+        $toUid = $data['toUid'];
+        $userConn = UserConnectionModel::getUidConnectionMap();
+
+        $conn = $userConn[$toUid] ?? null;
+        if ($conn instanceof TcpConnection) {
+            $conn->send(json_encode(['event' => 'send', 'msg' => 'hi']));
+        }
     }
 
     public function sendAll($data)
