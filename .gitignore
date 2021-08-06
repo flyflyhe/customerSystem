@@ -1,4 +1,4 @@
 vendor
 .idea
 .vscode
-src/.env
+app/.env

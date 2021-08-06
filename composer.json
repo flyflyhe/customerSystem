@@ -6,8 +6,8 @@
         "workerman/channel": "^1.1"
     },
     "autoload": {
-        "psr4": {
-            "app//": "./src"
+        "psr-4": {
+            "app\\": "./app"
         }
     }
 }
