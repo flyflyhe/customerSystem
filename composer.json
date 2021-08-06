@@ -1,7 +1,9 @@
 {
     "require": {
+        "php": "^8.0",
         "workerman/workerman": "^4.0",
-        "ext-pthreads": "*"
+        "vlucas/phpdotenv": "^5.3",
+        "workerman/channel": "^1.1"
     },
     "autoload": {
         "psr4": {
