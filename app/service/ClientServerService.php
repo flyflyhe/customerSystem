@@ -25,6 +25,7 @@ class ClientServerService
         $this->event = $event;
         $this->data = $data;
         $this->conn = $connection;
+        var_dump($this->data);
     }
 
     public function login(self $obj)
@@ -42,8 +43,9 @@ class ClientServerService
     public function send()
     {
         ChannelClient::publish(ChannelEvent::EVENT_SEND_USER_TO_USER, [
-            'toUid' => (int)$this->data['toUid'],
-            'fromUid' => (int)$this->data['fromUid'],
+            'toUser' => ['uid' => (int)$this->data['toUid'], 'username' => ''],
+            'fromUser' => ['uid' => (int)$this->data['fromUid'], 'username' => ''],
+            'msg' => $this->data['msg'],
         ]);
     }
 
