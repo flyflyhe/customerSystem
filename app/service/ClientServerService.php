@@ -3,8 +3,11 @@
 namespace app\service;
 
 use app\model\UserConnectionModel;
+use app\service\handle\AddUserHandle;
+use app\service\handle\Handle;
 use Channel\Client as ChannelClient;
 use Workerman\Connection\ConnectionInterface;
+use Workerman\Worker;
 
 class ClientServerService
 {
@@ -13,6 +16,7 @@ class ClientServerService
         ClientServerEvent::EVENT_LOGOUT => 'logout',
         ClientServerEvent::EVENT_SEND => 'send',
         ClientServerEvent::EVENT_SEND_ALL => 'sendAll',
+        ClientServerEvent::EVENT_ADD_USER => AddUserHandle::class,
     ];
 
     private string $event;
@@ -66,8 +70,22 @@ class ClientServerService
     public function handle()
     {
         if (!isset(self::$eventHandleMap[$this->event])) {
-            throw new \Exception($this->event.'未注册');
+            Worker::log("未注册的事件".$this->event);
+            return false;
         }
-        return call_user_func([$this, self::$eventHandleMap[$this->event]], $this);
+        $handle = self::$eventHandleMap[$this->event];
+        if (is_callable($handle)) {
+            return call_user_func($handle, $this);
+        } elseif (is_callable([$this, $handle])) {
+            return call_user_func([$this, $handle], $this);
+        } elseif (class_exists($handle) && class_implements($handle, Handle::class)) {
+            $handleObj = new $handle();
+            if ($handleObj instanceof Handle) {
+                return $handleObj->handle($this);
+            }
+        }
+
+        Worker::log("{$handle} 不可用");
+        return false;
     }
 }

@@ -38,6 +38,3 @@ $worker->onWorkerStart = function () {
     }
 
 };
-
-
-Worker::runAll();
