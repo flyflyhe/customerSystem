@@ -23,6 +23,10 @@ $worker->onConnect = function ($connection) {
 $worker->onWorkerStart = function ($task) {
     $channelClientService = new ChannelClientService();
     $channelClientService->start();
+
+    foreach (ClientServerService::getEventHandleMap() as $event => $_) {
+        echo "注册事件", $event, PHP_EOL;
+    }
 };
 
 // Emitted when data received

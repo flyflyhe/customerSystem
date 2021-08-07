@@ -12,6 +12,7 @@ class ClientServerService
         ClientServerEvent::EVENT_LOGIN => 'login',
         ClientServerEvent::EVENT_LOGOUT => 'logout',
         ClientServerEvent::EVENT_SEND => 'send',
+        ClientServerEvent::EVENT_SEND_ALL => 'sendAll',
     ];
 
     private string $event;
@@ -26,6 +27,11 @@ class ClientServerService
         $this->data = $data;
         $this->conn = $connection;
         var_dump($this->data);
+    }
+
+    public static function getEventHandleMap(): array
+    {
+        return self::$eventHandleMap;
     }
 
     public function login(self $obj)
@@ -43,8 +49,16 @@ class ClientServerService
     public function send()
     {
         ChannelClient::publish(ChannelEvent::EVENT_SEND_USER_TO_USER, [
-            'toUser' => ['uid' => (int)$this->data['toUid'], 'username' => ''],
-            'fromUser' => ['uid' => (int)$this->data['fromUid'], 'username' => ''],
+            'toUser' => ['uid' => (int)$this->data['toUser']['uid'], 'username' => $this->data['toUser']['username']],
+            'fromUser' => ['uid' => (int)$this->data['fromUser']['uid'], 'username' => $this->data['fromUser']['username']],
+            'msg' => $this->data['msg'],
+        ]);
+    }
+
+    public function sendAll()
+    {
+        ChannelClient::publish(ChannelEvent::EVENT_SEND_ALL, [
+            'fromUser' => ['uid' => (int)$this->data['fromUser']['uid'], 'username' => $this->data['fromUser']['username']],
             'msg' => $this->data['msg'],
         ]);
     }

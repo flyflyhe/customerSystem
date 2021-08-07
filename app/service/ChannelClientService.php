@@ -3,6 +3,7 @@
 namespace app\service;
 
 use app\model\UserConnectionModel;
+use app\tool\Json;
 use Channel\Client as ChannelClient;
 use Workerman\Connection\TcpConnection;
 use Workerman\Worker;
@@ -24,7 +25,7 @@ class ChannelClientService
         $fromUid = $data['fromUser']['uid'] ?? null;
         $message = $data['msg'];
         if ($toUid === null || $fromUid === null) {
-            Worker::log("toUid 或 fromUid 未设置".json_encode($data));
+            Worker::log("toUid 或 fromUid 未设置".json_encode($data, JSON_UNESCAPED_UNICODE));
             return;
         }
 
@@ -38,14 +39,33 @@ class ChannelClientService
 
     public function sendAll($data)
     {
-        echo 'send all', PHP_EOL;
+        $fromUid = $data['fromUser']['uid'] ?? null;
+        $fromUsername = $data['fromUser']['username'] ?? '';
+        $msg = $data['msg'];
+        if ($fromUid === null) {
+            Worker::log("fromUid 未设置".json_encode($data, JSON_UNESCAPED_UNICODE));
+            return;
+        }
+        $userConn = UserConnectionModel::getUidConnectionMap();
+
+        foreach ($userConn as $uid => $conn) {
+            if ($uid === $fromUid) {
+                continue;
+            }
+            if ($conn instanceof TcpConnection) {
+                $conn->send(Json::encode([
+                    'event' => 'send',
+                    'data' => ['msg' => $msg, 'fromUser' => ['uid' => $fromUid, 'username' => $fromUsername]]
+                ]));
+            }
+        }
     }
 
     public function start()
     {
         ChannelClient::connect();
         foreach (self::$eventFuncMap as $event => $func) {
-            ChannelClient::on($event, [$this, 'sendUserToUser']);
+            ChannelClient::on($event, [$this, $func]);
         }
     }
 }
