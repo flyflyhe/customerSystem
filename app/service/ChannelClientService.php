@@ -23,7 +23,6 @@ class ChannelClientService
     {
         $toUid = $data['toUser']['uid'] ?? null;
         $fromUid = $data['fromUser']['uid'] ?? null;
-        $message = $data['msg'];
         if ($toUid === null || $fromUid === null) {
             Worker::log("toUid 或 fromUid 未设置".json_encode($data, JSON_UNESCAPED_UNICODE));
             return;
@@ -33,15 +32,13 @@ class ChannelClientService
 
         $conn = $userConn[$toUid] ?? null;
         if ($conn instanceof TcpConnection) {
-            $conn->send(json_encode(['event' => 'send', 'data' => ['msg' => $message, 'fromUser' => ['uid' => $fromUid, 'username' => '']]]));
+            $conn->send(json_encode(['event' => 'send', 'data' => $data]));
         }
     }
 
     public function sendAll($data)
     {
         $fromUid = $data['fromUser']['uid'] ?? null;
-        $fromUsername = $data['fromUser']['username'] ?? '';
-        $msg = $data['msg'];
         if ($fromUid === null) {
             Worker::log("fromUid 未设置".json_encode($data, JSON_UNESCAPED_UNICODE));
             return;
@@ -55,7 +52,7 @@ class ChannelClientService
             if ($conn instanceof TcpConnection) {
                 $conn->send(Json::encode([
                     'event' => 'send',
-                    'data' => ['msg' => $msg, 'fromUser' => ['uid' => $fromUid, 'username' => $fromUsername]]
+                    'data' => $data
                 ]));
             }
         }
