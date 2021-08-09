@@ -3,13 +3,12 @@
 use app\model\UserConnectionModel;
 use app\service\ChannelClientService;
 use app\service\ClientServerService;
+use app\service\db\MysqlService;
 use Workerman\Connection\ConnectionInterface;
 use Workerman\Worker;
-use Workerman\Protocols\Text;
-use Workerman\Connection\TcpConnection;
-use Workerman\Timer;
 
 require dirname(__DIR__).'/vendor/autoload.php';
+require 'bootstrap/bootstrap.php';
 
 $worker = new Worker('websocket://0.0.0.0:9000');
 // 4 processes
@@ -23,6 +22,8 @@ $worker->onConnect = function ($connection) {
 $worker->onWorkerStart = function ($task) {
     $channelClientService = new ChannelClientService();
     $channelClientService->start();
+
+    MysqlService::init($_ENV['DB_HOST'], $_ENV['DB_PORT'], $_ENV['DB_USERNAME'], $_ENV['DB_PASSWORD'], $_ENV['DB_DATABASE']);
 
     foreach (ClientServerService::getEventHandleMap() as $event => $_) {
         echo "注册事件", $event, PHP_EOL;
