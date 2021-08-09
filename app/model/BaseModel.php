@@ -41,7 +41,17 @@ abstract class BaseModel
         $p = $this->primaryKey();
         $param = $this->toArray();
         unset($param[$p]);
-        return MysqlService::getDb()->update(static::getTable())->cols($this->toArray())->where([$p => $this->{$p}])->query();
+        return MysqlService::getDb()
+            ->update(static::getTable())
+            ->cols($this->toArray())
+            ->where("$p => :$p")
+            ->bindValues([$p => $this->{$p}])->limit(1)->query();
+    }
+
+    public function delete()
+    {
+        $p = $this->primaryKey();
+        return MysqlService::getDb()->delete(static::getTable())->where("$p => :$p")->bindValues([$p => $this->{$p}])->limit(1)->one();
     }
 
     public function toArray():array

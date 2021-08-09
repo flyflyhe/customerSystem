@@ -38,18 +38,21 @@ class ClientServerService
         return self::$eventHandleMap;
     }
 
+    //"{"event":"login","data":{"user":{"uid":1,"role":1}}}"
     public function login(self $obj)
     {
         $userConnectionModel = new UserConnectionModel();
-        $userConnectionModel->add($this->data['uid'], $this->conn);
+        $userConnectionModel->add($this->data['user']['uid'], $this->conn, $this->data['user']);
     }
 
+    //"{"event":"login","data":{"user":{"uid":1,"role":1}}}"
     public function logout()
     {
         $userConnectionModel = new UserConnectionModel();
-        $userConnectionModel->removeByUid($this->data['uid']);
+        $userConnectionModel->removeByUid($this->data['user']['uid']);
     }
 
+    //{"event":"send","data":{"fromUser":{"uid":1,"username":"11"},"toUser":{"uid":2,"username":"222"},"msg":"you are a dog"}}
     public function send()
     {
         ChannelClient::publish(ChannelEvent::EVENT_SEND_USER_TO_USER, [

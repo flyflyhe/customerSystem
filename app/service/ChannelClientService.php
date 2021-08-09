@@ -3,6 +3,7 @@
 namespace app\service;
 
 use app\model\UserConnectionModel;
+use app\service\db\MsgService;
 use app\tool\Json;
 use Channel\Client as ChannelClient;
 use Workerman\Connection\TcpConnection;
@@ -28,6 +29,8 @@ class ChannelClientService
             return;
         }
 
+        MsgService::getInstance()->add($fromUid, $data['msg'], $toUid);
+
         $userConn = UserConnectionModel::getUidConnectionMap();
 
         $conn = $userConn[$toUid] ?? null;
@@ -49,6 +52,8 @@ class ChannelClientService
             if ($uid === $fromUid) {
                 continue;
             }
+
+            MsgService::getInstance()->add($fromUid, $data['msg'], $uid);
             if ($conn instanceof TcpConnection) {
                 $conn->send(Json::encode([
                     'event' => 'send',
