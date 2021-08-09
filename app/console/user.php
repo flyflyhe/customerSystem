@@ -14,5 +14,5 @@ MysqlService::init($_ENV['DB_HOST'], $_ENV['DB_PORT'], $_ENV['DB_USERNAME'], $_E
 //var_dump($user->save());
 //var_dump($user);
 
-$user = \app\model\UserModel::find()->where('id = :id')->bindValues(['id'=>1])->one(\app\model\UserModel::class);
+$user = \app\model\UserModel::find()->where('id = :id')->bindValues(['id'=>1])->one();
 var_dump($user);

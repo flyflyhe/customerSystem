@@ -6,6 +6,8 @@ use Workerman\MySQL\Connection;
 
 class MysqlConnection extends Connection
 {
+    protected string $modelClass = '';
+
     public function getPdo():\PDO
     {
         return $this->pdo;
@@ -15,8 +17,17 @@ class MysqlConnection extends Connection
     {
     }
 
+    public function setModelClass($class):self
+    {
+        $this->modelClass = $class;
+        return $this;
+    }
+
     public function all($class = ''):array
     {
+        if (!$class) {
+            $class = $this->modelClass;
+        }
         $result = [];
         $data = $this->query();
         if (is_array($data) && class_exists($class)) {
@@ -30,6 +41,9 @@ class MysqlConnection extends Connection
 
     public function one($class = '')
     {
+        if (!$class) {
+            $class = $this->modelClass;
+        }
         $data = $this->query();
         if (is_array($data) && class_exists($class)) {
             return $this->buildModel($data[0], $class);

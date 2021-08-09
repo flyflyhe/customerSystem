@@ -19,7 +19,8 @@ abstract class BaseModel
 
     public static function find():MysqlConnection
     {
-        return MysqlService::getDb()->select(static::attributes())->from(static::getTable());
+        $class = get_called_class();
+        return MysqlService::getDb()->select(static::attributes())->from(static::getTable())->setModelClass($class);
     }
 
     public function save():bool
