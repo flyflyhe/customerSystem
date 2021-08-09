@@ -23,7 +23,7 @@ class UserModel extends BaseModel
         return 'user';
     }
 
-    public function attributes(): array
+    public static function attributes(): array
     {
         return ['id', 'name', 'password', 'role', 'created', 'updated'];
     }

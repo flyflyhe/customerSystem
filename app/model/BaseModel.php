@@ -10,7 +10,7 @@ abstract class BaseModel
 {
     abstract static function getTable():string;
 
-    abstract public function attributes():array;
+    abstract static public function attributes():array;
 
     public function primaryKey():string
     {
@@ -19,7 +19,7 @@ abstract class BaseModel
 
     public static function find():MysqlConnection
     {
-        return MysqlService::getDb()->table(static::getTable());
+        return MysqlService::getDb()->select(static::attributes())->from(static::getTable());
     }
 
     public function save():bool
@@ -46,7 +46,7 @@ abstract class BaseModel
     public function toArray():array
     {
         $result = [];
-        foreach ($this->attributes() as $k) {
+        foreach ($this::attributes() as $k) {
             $result[$k] = $this->$k;
         }
         return $result;

@@ -49,16 +49,16 @@ class MysqlConnection extends Connection
                     $typeName = $property->getType()->getName();
                     switch ($typeName) {
                         case 'string':
-                            $property->setValue((string)$v);
+                            $property->setValue($obj, (string)$v);
                             break;
                         case 'integer':
                         case 'int':
-                            $property->setValue((int)$v);
+                            $property->setValue($obj, (int)$v);
                             break;
                         default:;
                     }
                 } else {
-                    $property->setValue($v);
+                    $property->setValue($obj, $v);
                 }
             }
         }
