@@ -8,4 +8,9 @@ class Json
     {
         return json_encode($data, JSON_UNESCAPED_UNICODE);
     }
+
+    public static function decode($data):array
+    {
+        return json_decode($data, true);
+    }
 }

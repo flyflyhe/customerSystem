@@ -2,19 +2,18 @@
 
 namespace app\service\db;
 
-use app\service\handle\SingleInstanceService;
-use Workerman\MySQL\Connection;
+use app\component\MysqlConnection;
 
 class MysqlService
 {
-    private static ?Connection $connection = null;
+    private static ?MysqlConnection $connection = null;
 
     public static function init($host, $port, $user, $password, $dbName)
     {
-        self::$connection = new Connection($host, $port, $user, $password, $dbName);
+        self::$connection = new MysqlConnection($host, $port, $user, $password, $dbName);
     }
 
-    public static function getDb():Connection
+    public static function getDb():MysqlConnection
     {
         if (self::$connection === null) {
             throw new \Exception('db 连接未初始化');
