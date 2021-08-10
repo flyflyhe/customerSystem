@@ -53,7 +53,6 @@ class ChannelClientService
                 continue;
             }
 
-            MsgService::getInstance()->add($fromUid, $data['msg'], $uid);
             if ($conn instanceof TcpConnection) {
                 $conn->send(Json::encode([
                     'event' => 'send',
