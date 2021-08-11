@@ -1,17 +1,15 @@
 <?php
 
-use app\model\UserConnectionModel;
 use app\service\db\MysqlService;
-use Workerman\Connection\ConnectionInterface;
+use app\service\web\WebHandle;
+use Workerman\Connection\TcpConnection;
 use Workerman\Protocols\Http\Request;
 use Workerman\Worker;
 
 require dirname(__DIR__).'/vendor/autoload.php';
 require 'bootstrap/bootstrap.php';
 
-$worker = new Worker('http://0.0.0.0:9001');
-// 4 processes
-$worker->count = 4;
+$worker = new Worker('http://0.0.0.0:9003');
 
 // Emitted when new connection come
 $worker->onConnect = function ($connection) {
@@ -23,18 +21,20 @@ $worker->onWorkerStart = function ($task) {
 };
 
 // Emitted when data received
-$worker->onMessage = function (ConnectionInterface $connection, Request $request) {
+$worker->onMessage = function (TcpConnection $connection, Request $request) {
     $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
-        $r->addRoute('GET', '/users', 'get_all_users_handler');
+        $r->addRoute('GET', '/login', WebHandle::class);
         // {id} must be a number (\d+)
-        $r->addRoute('GET', '/user/{id:\d+}', 'get_user_handler');
+        //$r->addRoute('GET', '/user/{id:\d+}', 'get_user_handler');
         // The /{title} suffix is optional
-        $r->addRoute('GET', '/articles/{id:\d+}[/{title}]', 'get_article_handler');
+        //$r->addRoute('GET', '/articles/{id:\d+}[/{title}]', 'get_article_handler');
     });
 
     // Fetch method and URI from somewhere
     $httpMethod = $request->method();
     $uri = $request->uri();
+
+    echo $httpMethod, '||', $uri, PHP_EOL;
 
     // Strip query string (?foo=bar) and decode URI
     if (false !== $pos = strpos($uri, '?')) {
@@ -45,24 +45,26 @@ $worker->onMessage = function (ConnectionInterface $connection, Request $request
     $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
     switch ($routeInfo[0]) {
         case FastRoute\Dispatcher::NOT_FOUND:
-            // ... 404 Not Found
             break;
         case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
             $allowedMethods = $routeInfo[1];
             // ... 405 Method Not Allowed
             break;
         case FastRoute\Dispatcher::FOUND:
-            $handler = $routeInfo[1];
-            $vars = $routeInfo[2];
-            // ... call $handler with $vars
+            $classOrFunc = $routeInfo[1];
+            $args = (array)$routeInfo[2];
+            if (is_string($classOrFunc) && class_exists($classOrFunc)) {
+                $handler = new $classOrFunc();
+                if ($handler instanceof WebHandle) {
+                    $handler->handle($connection, $request, $args);
+                }
+            }
             break;
     }
 };
 
 // Emitted when connection is closed
 $worker->onClose = function ($connection) {
-    $userConnectModel = new UserConnectionModel();
-    $userConnectModel->removeByConnection($connection);
     echo "Connection closed\n";
 };
 
