@@ -10,7 +10,7 @@ use Workerman\Protocols\Http\Response;
 
 class LoginHandle implements WebHandle
 {
-    public function handle(TcpConnection $connection, Request $request, array $argv = [])
+    public function handle(TcpConnection $connection, Request $request, Response $response ,array $argv = [])
     {
         $username = $request->post('username');
         $password = $request->post('password');
@@ -18,10 +18,9 @@ class LoginHandle implements WebHandle
         //验证省略
         $user = UserModel::find()->where("name = :name")->bindValues(['name' => $username])->one();
 
-        $response = new Response(200);
         if (!$user) {
             $response->withStatus(401);
-            return $connection->send("");
+            return $connection->send($response);
         }
 
         $response->withBody(Json::encode($user));

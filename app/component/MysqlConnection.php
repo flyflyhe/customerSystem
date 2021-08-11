@@ -30,7 +30,7 @@ class MysqlConnection extends Connection
         }
         $result = [];
         $data = $this->query();
-        if (is_array($data) && class_exists($class)) {
+        if (is_array($data) && !empty($data) && class_exists($class)) {
             foreach ($data as $row) {
                 $result[] = $this->buildModel($row, $class);
             }
@@ -45,7 +45,7 @@ class MysqlConnection extends Connection
             $class = $this->modelClass;
         }
         $data = $this->query();
-        if (is_array($data) && class_exists($class)) {
+        if (is_array($data) && !empty($data) && class_exists($class)) {
             return $this->buildModel($data[0], $class);
         }
 
