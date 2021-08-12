@@ -38,11 +38,18 @@ class ClientServerService
         return self::$eventHandleMap;
     }
 
-    //"{"event":"login","data":{"user":{"uid":1,"role":1}}}"
+    //"{"event":"login","data":{"user":{"uid":1,"role":1,"username":"abc"}}}"
     public function login(self $obj)
     {
         $userConnectionModel = new UserConnectionModel();
         $userConnectionModel->add($this->data['user']['uid'], $this->conn, $this->data['user']);
+        ChannelClient::publish(ChannelEvent::EVENT_LOGIN_NOTIFY, [
+            'user' => ['uid' => $this->data['user']['uid'], 'username' => $this->data['user']['username'] ?? ''],
+            'msg' => ($this->data['user']['username'] ?? '').'上线',
+        ]);
+        ChannelClient::publish(ChannelEvent::EVENT_LOGIN, [
+            'user' => ['uid' => $this->data['user']['uid']],
+        ]);
     }
 
     //"{"event":"login","data":{"user":{"uid":1,"role":1}}}"
@@ -52,7 +59,7 @@ class ClientServerService
         $userConnectionModel->removeByUid($this->data['user']['uid']);
     }
 
-    //{"event":"send","data":{"fromUser":{"uid":1,"username":"11"},"toUser":{"uid":2,"username":"222"},"msg":"you are a dog"}}
+    //{"event":"message","data":{"fromUser":{"uid":1,"username":"11"},"toUser":{"uid":2,"username":"222"},"msg":"you are a dog"}}
     public function send()
     {
         ChannelClient::publish(ChannelEvent::EVENT_SEND_USER_TO_USER, [

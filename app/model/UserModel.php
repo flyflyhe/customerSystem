@@ -27,4 +27,9 @@ class UserModel extends BaseModel
     {
         return ['id', 'name', 'password', 'role', 'created', 'updated'];
     }
+
+    public static function getUserByUid(int $uid):?self
+    {
+        return UserModel::find()->where("id = :id")->bindValues(['id' => $uid])->one();
+    }
 }
