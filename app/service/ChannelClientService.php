@@ -89,38 +89,33 @@ class ChannelClientService
         $toUid = $data['user']['uid'] ?? null;
         $userConn = UserConnectionModel::getUidConnectionMap();
 
-        $result = [];
-        $conn = $userConn[$toUid] ?? null;
-        if ($conn instanceof TcpConnection) {
-            foreach ($userConn as $uid => $conn) {
-                if ($toUid === $uid) {
-                    continue;
-                }
-
-                $user = UserModel::getUserByUid($uid);
-                if (!$user) {
-                    continue;
-                }
-
-                $result[] = [
-                    "area" => "北京-北京",
-                    "autograph" => "不是每个人都能成为自己想要的样子，但每个人，都可以努力成为自己想要的样子.",
-                    "avatar" => "http://www.lmsail.com/storage/9d770a4b695cc49ed23525bebca15790.jpeg",
-                    "id" => $user->id,
-                    "introduction" => "90后 | Mr.bo | PHPER工程师",
-                    "lockstate" => 0,
-                    "nickname" => $user->name,
-                    "phone" => 18899888899
-                ];
-                var_dump($result);
+        echo '连接数', count($userConn), PHP_EOL;
+        var_dump(array_keys($userConn));
+        foreach ($userConn as $uid => $conn) {
+            if ($toUid === $uid) {
+                continue;
             }
 
+            $user = UserModel::getUserByUid($uid);
+            if (!$user) {
+                continue;
+            }
 
-            $conn->send(Json::encode([
-                'event' => 'login',
-                'data' => $result
-            ]));
+            $result = [
+                "area" => "北京-北京",
+                "autograph" => "不是每个人都能成为自己想要的样子，但每个人，都可以努力成为自己想要的样子.",
+                "avatar" => "http://www.lmsail.com/storage/9d770a4b695cc49ed23525bebca15790.jpeg",
+                "id" => $user->id,
+                "introduction" => "90后 | Mr.bo | PHPER工程师",
+                "lockstate" => 0,
+                "nickname" => $user->name,
+                "phone" => 18899888899
+            ];
 
+            ChannelClient::publish(ChannelEvent::EVENT_LOGIN_NOTIFY, [
+                'user' => ['uid' => $user->id, 'username' => $user->name],
+                'msg' => $user->name.'上线',
+            ]);
         }
 
 
