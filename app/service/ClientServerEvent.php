@@ -2,6 +2,11 @@
 
 namespace app\service;
 
+/**
+ * 与客户端通讯的事件name
+ * Interface ClientServerEvent
+ * @package app\service
+ */
 interface ClientServerEvent
 {
     const EVENT_LOGIN = 'login';
