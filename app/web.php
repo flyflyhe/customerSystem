@@ -56,21 +56,18 @@ $worker->onMessage = function (TcpConnection $connection, Request $request) {
     }
     $uri = rawurldecode($uri);
 
-    echo $httpMethod, '||', $uri, PHP_EOL;
-
     $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
     switch ($routeInfo[0]) {
         case FastRoute\Dispatcher::NOT_FOUND:
-            $connection->send((new Response())->withStatus(404));
+            $connection->send($response->withStatus(404));
             break;
         case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
             $allowedMethods = $routeInfo[1];
-            // ... 405 Method Not Allowed
+            $connection->send($response->withStatus(405));
             break;
         case FastRoute\Dispatcher::FOUND:
             $classOrFunc = $routeInfo[1];
             $args = (array)$routeInfo[2];
-            var_dump($classOrFunc);
             if (is_string($classOrFunc) && class_exists($classOrFunc)) {
                 $handler = new $classOrFunc();
                 if ($handler instanceof WebHandle) {
